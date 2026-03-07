@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Smart Traffic — Guntur · Vijayawada</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f5f4f0;--surface:#fff;--border:#e2e0d8;--border2:#d0cec5;
+  --text:#1a1916;--muted:#8a8880;--muted2:#b8b6b0;
+  --green:#1e6b45;--green-bg:#eaf4ee;
+  --red:#b83232;--red-bg:#fdf0ee;
+  --amber:#a85c07;--amber-bg:#fef3e2;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+html,body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;background:var(--surface);border-bottom:1px solid var(--border);}
+.h-left{display:flex;align-items:center;gap:12px;}
+.h-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.h-title{font-size:.78rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;}
+.h-sub{font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-top:2px;}
+.h-right{display:flex;align-items:center;gap:14px;}
+#clock{font-family:var(--mono);font-size:.78rem;color:var(--muted);letter-spacing:.05em;}
+.h-badge{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;padding:3px 9px;border-radius:3px;}
+.badge-live{background:var(--green-bg);color:var(--green);border:1px solid #b0d9bf;}
+.badge-sim {background:#f0ede6;color:var(--muted);border:1px solid var(--border2);}
+.h-loc{font-family:var(--mono);font-size:.6rem;color:var(--muted2);letter-spacing:.06em;}
+
+/* LAYOUT */
+main{display:grid;grid-template-columns:360px 1fr;grid-template-rows:auto 1fr auto;
+  gap:1px;background:var(--border);min-height:calc(100vh - 53px);}
+.panel{background:var(--surface);padding:22px;}
+.p-label{font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;
+  color:var(--muted2);text-transform:uppercase;margin-bottom:14px;}
+
+/* JUNCTION */
+.panel-junction{grid-row:1/-1;display:flex;flex-direction:column;gap:0;}
+.jct-wrap{display:flex;align-items:center;justify-content:center;padding:4px 0 20px;}
+svg#jct{width:100%;max-width:300px;}
+.rd{fill:#ece9e1}.rd-c{fill:#e2dfd6}
+.rd-ln{stroke:#d0cec5;stroke-width:.7;stroke-dasharray:5 4;fill:none}
+.rd-edge{stroke:#ccc9be;stroke-width:1;fill:none}
+.snode{transition:fill .3s,opacity .3s}
+.snode-green{fill:var(--green)}
+.snode-red{fill:#d14040;opacity:.7}
+.snode-emg{fill:#b83232;animation:emgp .4s ease-in-out infinite alternate}
+@keyframes emgp{from{opacity:.5}to{opacity:1}}
+.jtimer{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;transition:fill .3s}
+.jt-green{fill:#fff}.jt-red{fill:#d14040}
+.jlabel{font-family:'DM Sans',sans-serif;font-size:8.5px;font-weight:500;fill:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.jcount{font-family:'DM Mono',monospace;font-size:8px;fill:var(--muted2)}
+.jname{font-family:'DM Sans',sans-serif;font-size:8px;fill:var(--muted);font-style:italic}
+
+/* LANE LIST */
+.lane-list{display:flex;flex-direction:column;gap:2px;}
+.lane-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  border-radius:6px;border:1px solid transparent;transition:background .25s,border-color .25s;}
+.lane-row.GREEN{background:var(--green-bg);border-color:#b0d9bf;}
+.lane-row.RED{background:#fafaf8;border-color:var(--border);}
+.lane-row.EMERGENCY{background:var(--red-bg);border-color:#e8b0a8;
+  animation:emgrow .5s ease-in-out infinite alternate;}
+@keyframes emgrow{from{background:#fdf0ee}to{background:#fae3e0}}
+.lr-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.lr-dot.GREEN{background:var(--green);box-shadow:0 0 0 2.5px #b0d9bf;}
+.lr-dot.RED{background:var(--muted2);}
+.lr-dot.EMG{background:var(--red);box-shadow:0 0 0 2.5px #e8b0a8;animation:emgp .45s infinite alternate;}
+.lr-info{flex:1;min-width:0;}
+.lr-road{font-size:.72rem;font-weight:500;color:var(--text);}
+.lr-dir{font-size:.6rem;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.lr-reason{font-size:.6rem;color:var(--muted);margin-top:3px;line-height:1.35;}
+.vchips{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.vchip{font-family:var(--mono);font-size:.56rem;padding:1px 5px;border-radius:3px;
+  background:#f0ede6;color:var(--muted);border:1px solid var(--border);}
+.vchip.hi{background:#e8f4ec;color:var(--green);border-color:#b0d9bf;}
+.lr-right{text-align:right;flex-shrink:0;}
+.lr-timer{font-family:var(--mono);font-size:.7rem;font-weight:500;}
+.lr-timer.GREEN{color:var(--green)}.lr-timer.RED{color:var(--muted);}
+.lr-cong{font-family:var(--mono);font-size:.56rem;color:var(--muted2);margin-top:2px;}
+
+/* DATA SOURCE INDICATOR */
+.ds-bar{font-family:var(--mono);font-size:.6rem;padding:5px 10px;border-radius:4px;
+  text-align:center;margin-bottom:10px;}
+.ds-live{background:var(--green-bg);color:var(--green);border:1px solid #b0d9bf;}
+.ds-sim{background:#f0ede6;color:var(--muted);border:1px solid var(--border2);}
+
+/* STATS */
+.panel-stats{grid-column:2;grid-row:1;display:flex;gap:0;padding:0;border-bottom:1px solid var(--border);}
+.stat{flex:1;padding:18px 20px;border-right:1px solid var(--border);transition:background .15s;}
+.stat:last-child{border-right:none;}
+.stat:hover{background:#fafaf8;}
+.stat-num{font-family:var(--mono);font-size:1.45rem;font-weight:500;color:var(--text);line-height:1;}
+.stat-label{font-size:.58rem;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* CHART */
+.panel-chart{grid-column:2;grid-row:2;border-bottom:1px solid var(--border);}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.chart-legend{display:flex;gap:12px;}
+.cl-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:.58rem;color:var(--muted);}
+.cl-dot{width:6px;height:6px;border-radius:50%;}
+.chart-wrap{height:155px;position:relative;}
+
+/* LOG */
+.panel-log{grid-column:2;grid-row:3;}
+.log-scroll{display:flex;flex-direction:column;gap:6px;max-height:155px;overflow-y:auto;}
+.log-scroll::-webkit-scrollbar{width:3px;}
+.log-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.log-entry{display:flex;align-items:baseline;gap:9px;font-family:var(--mono);font-size:.62rem;
+  padding:6px 10px;border-radius:4px;background:#fafaf8;border-left:2px solid var(--border2);
+  animation:slideup .22s ease;}
+@keyframes slideup{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.log-entry.emg  {border-left-color:var(--red);  background:var(--red-bg);}
+.log-entry.bike {border-left-color:var(--green); background:var(--green-bg);}
+.log-entry.heavy{border-left-color:var(--amber); background:var(--amber-bg);}
+.le-src{padding:1px 4px;border-radius:2px;font-size:.52rem;margin-right:2px;}
+.le-src.real{background:var(--green-bg);color:var(--green);}
+.le-src.sim{background:#f0ede6;color:var(--muted);}
+.le-time{color:var(--muted2);white-space:nowrap;min-width:50px;}
+.le-road{font-weight:500;color:var(--text);white-space:nowrap;}
+.le-reason{color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.le-dur{color:var(--green);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-left">
+    <div class="h-dot"></div>
+    <div>
+      <div class="h-title">Smart Traffic Management System</div>
+      <div class="h-sub">Junction Control · Guntur &amp; Vijayawada, AP</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <span class="h-loc">NH-16 Corridor · AP</span>
+    <span class="h-badge badge-sim" id="mode-badge">SIM</span>
+    <span id="clock">--:--:--</span>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: JUNCTION -->
+  <div class="panel panel-junction">
+    <div class="p-label">Junction Signal View</div>
+    <div id="ds-bar" class="ds-bar ds-sim">Simulation Mode — run youtube_detector.py for live data</div>
+
+    <div class="jct-wrap">
+      <svg id="jct" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0"   y="116" width="300" height="68" class="rd"/>
+        <rect x="116" y="0"   width="68"  height="300" class="rd"/>
+        <rect x="116" y="116" width="68"  height="68"  class="rd-c"/>
+        <line x1="0"   y1="116" x2="116" y2="116" class="rd-edge"/>
+        <line x1="0"   y1="184" x2="116" y2="184" class="rd-edge"/>
+        <line x1="184" y1="116" x2="300" y2="116" class="rd-edge"/>
+        <line x1="184" y1="184" x2="300" y2="184" class="rd-edge"/>
+        <line x1="116" y1="0"   x2="116" y2="116" class="rd-edge"/>
+        <line x1="184" y1="0"   x2="184" y2="116" class="rd-edge"/>
+        <line x1="116" y1="184" x2="116" y2="300" class="rd-edge"/>
+        <line x1="184" y1="184" x2="184" y2="300" class="rd-edge"/>
+        <line x1="150" y1="0"   x2="150" y2="116" class="rd-ln"/>
+        <line x1="150" y1="184" x2="150" y2="300" class="rd-ln"/>
+        <line x1="0"   y1="150" x2="116" y2="150" class="rd-ln"/>
+        <line x1="184" y1="150" x2="300" y2="150" class="rd-ln"/>
+        <rect x="128" y="128" width="44" height="44" rx="4" fill="var(--surface)" stroke="var(--border2)" stroke-width="1"/>
+        <text x="150" y="148" text-anchor="middle" font-family="DM Mono" font-size="6.5" fill="var(--muted2)">GUNTUR</text>
+        <text x="150" y="160" text-anchor="middle" font-family="DM Mono" font-size="6.5" fill="var(--muted2)">JUNC</text>
+        <!-- Lane 1 North — Brodipet -->
+        <text x="150" y="14"  text-anchor="middle" class="jlabel">Lane 1</text>
+        <text x="150" y="24"  text-anchor="middle" class="jname">Brodipet</text>
+        <circle cx="150" cy="52" r="22" fill="#f0ede6" stroke="var(--border2)" stroke-width="1"/>
+        <circle cx="150" cy="52" r="14" id="s1" class="snode snode-red"/>
+        <text   x="150" y="56" text-anchor="middle" id="s1t" class="jtimer jt-red">—</text>
+        <text   x="150" y="98" text-anchor="middle" id="sv-l1c" class="jcount">—</text>
+        <!-- Lane 2 East — Benz Circle -->
+        <text x="288" y="147" text-anchor="end" class="jlabel">Lane 2</text>
+        <text x="288" y="157" text-anchor="end" class="jname">Benz Circle</text>
+        <circle cx="252" cy="150" r="22" fill="#f0ede6" stroke="var(--border2)" stroke-width="1"/>
+        <circle cx="252" cy="150" r="14" id="s2" class="snode snode-red"/>
+        <text   x="252" y="154" text-anchor="middle" id="s2t" class="jtimer jt-red">—</text>
+        <text   x="200" y="147" text-anchor="middle" id="sv-l2c" class="jcount">—</text>
+        <!-- Lane 3 South — NH-16 -->
+        <text x="150" y="290" text-anchor="middle" class="jlabel">Lane 3</text>
+        <text x="150" y="299" text-anchor="middle" class="jname">NH-16 · Vjwada</text>
+        <circle cx="150" cy="250" r="22" fill="#f0ede6" stroke="var(--border2)" stroke-width="1"/>
+        <circle cx="150" cy="250" r="14" id="s3" class="snode snode-red"/>
+        <text   x="150" y="254" text-anchor="middle" id="s3t" class="jtimer jt-red">—</text>
+        <text   x="150" y="207" text-anchor="middle" id="sv-l3c" class="jcount">—</text>
+        <!-- Lane 4 West — Lakshmipuram -->
+        <text x="12" y="147" text-anchor="start" class="jlabel">Lane 4</text>
+        <text x="12" y="157" text-anchor="start" class="jname">Lakshmipuram</text>
+        <circle cx="48" cy="150" r="22" fill="#f0ede6" stroke="var(--border2)" stroke-width="1"/>
+        <circle cx="48" cy="150" r="14" id="s4" class="snode snode-red"/>
+        <text   x="48" y="154" text-anchor="middle" id="s4t" class="jtimer jt-red">—</text>
+        <text   x="100" y="147" text-anchor="middle" id="sv-l4c" class="jcount">—</text>
+      </svg>
+    </div>
+
+    <div class="p-label" style="margin-top:4px">Lane Details</div>
+    <div class="lane-list" id="lane-list"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="panel-stats">
+    <div class="stat">
+      <div class="stat-num" id="sv-total">0</div>
+      <div class="stat-label">Vehicles Today</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="sv-emg" style="color:var(--red)">0</div>
+      <div class="stat-label">Emergencies</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="sv-bike" style="color:var(--green)">0</div>
+      <div class="stat-label">2W Saves</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="sv-heavy" style="color:var(--amber)">0</div>
+      <div class="stat-label">Heavy Extends</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="sv-avg">0<span style="font-size:.85rem">s</span></div>
+      <div class="stat-label">Avg Green</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="panel panel-chart">
+    <div class="chart-header">
+      <div class="p-label" style="margin-bottom:0">Real-time Vehicle Flow</div>
+      <div class="chart-legend" id="chart-legend"></div>
+    </div>
+    <div class="chart-wrap"><canvas id="flowChart"></canvas></div>
+  </div>
+
+  <!-- LOG -->
+  <div class="panel panel-log">
+    <div class="p-label">Signal Decisions</div>
+    <div class="log-scroll" id="log-list"></div>
+  </div>
+</main>
+
+<script>
+// ── CLOCK ──────────────────────────────────────────────────────────────────
+setInterval(()=>{ document.getElementById("clock").textContent=new Date().toTimeString().split(" ")[0]; },1000);
+
+// ── AP ROAD DIRECTIONS ────────────────────────────────────────────────────
+const DIRECTIONS = {
+  1:"↑ Brodipet → Amaravati Rd",
+  2:"→ Benz Circle → MG Road",
+  3:"↓ NH-16 → Vijayawada",
+  4:"← Lakshmipuram → Besant Rd"
+};
+const LANE_COLORS = ["#1e6b45","#1d4ed8","#a85c07","#6b21a8"];
+
+// chart
+const flowChart = new Chart(document.getElementById("flowChart"),{
+  type:"line",
+  data:{labels:[],datasets:[1,2,3,4].map((l,i)=>({
+    label:`L${l}`,data:[],borderColor:LANE_COLORS[i],
+    backgroundColor:"transparent",borderWidth:1.5,pointRadius:0,tension:0.4,
+  }))},
+  options:{
+    animation:{duration:250},responsive:true,maintainAspectRatio:false,
+    scales:{
+      x:{display:false},
+      y:{min:0,ticks:{color:"#b8b6b0",font:{family:"DM Mono",size:9}},
+         grid:{color:"#e8e6de"},border:{display:false}}
+    },
+    plugins:{legend:{display:false}}
+  }
+});
+const lg=document.getElementById("chart-legend");
+["Brodipet","Benz Circle","NH-16","Lakshmipuram"].forEach((n,i)=>{
+  lg.innerHTML+=`<div class="cl-item"><div class="cl-dot" style="background:${LANE_COLORS[i]}"></div>${n}</div>`;
+});
+
+// SVG map
+const sigMap={
+  1:{s:"s1",t:"s1t",c:"sv-l1c"},2:{s:"s2",t:"s2t",c:"sv-l2c"},
+  3:{s:"s3",t:"s3t",c:"sv-l3c"},4:{s:"s4",t:"s4t",c:"sv-l4c"},
+};
+let greenLaneId=null, greenEndsAt=0;
+let localStats={bike:0,heavy:0};
+
+function updateSVG(snapshot){
+  snapshot.forEach(lane=>{
+    const m=sigMap[lane.lane_id];if(!m)return;
+    const circ=document.getElementById(m.s);
+    const timerEl=document.getElementById(m.t);
+    const cntEl=document.getElementById(m.c);
+    const total=lane.total||0;
+    const isGreen=lane.signal==="GREEN";
+    const isEmg=lane.emergency;
+    circ.className.baseVal="snode "+(isEmg?"snode-emg":isGreen?"snode-green":"snode-red");
+    if(isGreen){
+      const rem=Math.max(0,Math.round((greenEndsAt-Date.now())/1000));
+      timerEl.textContent=rem>0?rem+"s":"—";
+      timerEl.className.baseVal="jtimer jt-green";
+    } else {
+      timerEl.textContent=lane.wait_time>0?lane.wait_time+"s":"—";
+      timerEl.className.baseVal="jtimer jt-red";
+    }
+    cntEl.textContent=total>0?total+"v":"0v";
+  });
+}
+
+function renderAll(snapshot, isLive){
+  // Mode badge
+  const badge=document.getElementById("mode-badge");
+  const dsBar=document.getElementById("ds-bar");
+  if(isLive){
+    badge.textContent="LIVE"; badge.className="h-badge badge-live";
+    dsBar.textContent="🔴 LIVE — Real vehicle data from stream";
+    dsBar.className="ds-bar ds-live";
+  } else {
+    badge.textContent="SIM"; badge.className="h-badge badge-sim";
+    dsBar.textContent="Simulation Mode — run youtube_detector.py for live data";
+    dsBar.className="ds-bar ds-sim";
+  }
+
+  // Green countdown
+  const gl=snapshot.find(l=>l.signal==="GREEN");
+  if(gl && gl.lane_id!==greenLaneId){
+    greenLaneId=gl.lane_id;
+    greenEndsAt=Date.now()+gl.green_duration*1000;
+  }
+
+  updateSVG(snapshot);
+
+  // Lane list
+  const ll=document.getElementById("lane-list");
+  ll.innerHTML=snapshot.map(lane=>{
+    const isGreen=lane.signal==="GREEN";
+    const isEmg=lane.emergency;
+    const rowCls=isEmg?"lane-row EMERGENCY":isGreen?"lane-row GREEN":"lane-row RED";
+    const dotCls=isEmg?"lr-dot EMG":isGreen?"lr-dot GREEN":"lr-dot RED";
+    const bikeHi=(lane.bikes/Math.max(lane.total,1))>0.5;
+    const timerTxt=isGreen?`${lane.green_duration}s green`:lane.wait_time>0?`~${lane.wait_time}s`:"";
+    const timerCls=isGreen?"lr-timer GREEN":"lr-timer RED";
+    if(lane.reason){
+      if(lane.reason.includes("2-Wheeler")) localStats.bike++;
+      if(lane.reason.includes("APSRTC"))    localStats.heavy++;
+    }
+    return`<div class="${rowCls}">
+      <div class="${dotCls}"></div>
+      <div class="lr-info">
+        <div class="lr-road">${lane.lane_name}${isEmg?' <span style="font-size:.58rem;color:var(--red)">🚨</span>':""}</div>
+        <div class="lr-dir">${DIRECTIONS[lane.lane_id]||""}</div>
+        <div class="lr-reason">${lane.reason||""}</div>
+        <div class="vchips">
+          <span class="vchip${bikeHi?" hi":""}">🛵 ${lane.bikes}</span>
+          <span class="vchip">🚗 ${lane.cars}</span>
+          <span class="vchip">🚌 ${lane.buses}</span>
+          <span class="vchip">🚛 ${lane.trucks}</span>
+        </div>
+      </div>
+      <div class="lr-right">
+        <div class="${timerCls}">${timerTxt}</div>
+        <div class="lr-cong">${lane.congestion||""}</div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Chart
+  const t=new Date().toLocaleTimeString("en-IN",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  flowChart.data.labels.push(t);
+  [1,2,3,4].forEach((id,i)=>{
+    const lane=snapshot.find(l=>l.lane_id===id);
+    flowChart.data.datasets[i].data.push(lane?lane.total:0);
+  });
+  if(flowChart.data.labels.length>30){flowChart.data.labels.shift();flowChart.data.datasets.forEach(d=>d.data.shift());}
+  flowChart.update();
+}
+
+// stats from API
+async function updateStats(){
+  try{
+    const r=await fetch("/api/stats"); const s=await r.json();
+    document.getElementById("sv-total").textContent=s.total_vehicles.toLocaleString();
+    document.getElementById("sv-emg").textContent=s.emergency_count;
+    document.getElementById("sv-avg").innerHTML=`${s.avg_green}<span style="font-size:.85rem">s</span>`;
+    document.getElementById("sv-bike").textContent=localStats.bike;
+    document.getElementById("sv-heavy").textContent=localStats.heavy;
+  }catch(e){}
+}
+
+// log
+async function updateLog(){
+  try{
+    const r=await fetch("/api/signal_log"); const logs=await r.json();
+    document.getElementById("log-list").innerHTML=logs.slice(0,8).map(l=>{
+      const isEmg=l.reason.includes("Emergency")||l.reason.includes("Ambulance");
+      const isBike=l.reason.includes("2-Wheeler");
+      const isHeavy=l.reason.includes("APSRTC");
+      const cls=isEmg?"log-entry emg":isBike?"log-entry bike":isHeavy?"log-entry heavy":"log-entry";
+      const t=l.timestamp?l.timestamp.split(" ")[1].substring(0,8):"";
+      return`<div class="${cls}">
+        <span class="le-time">${t}</span>
+        <span class="le-road">${l.lane_name}</span>
+        <span class="le-reason">${l.reason}</span>
+        <span class="le-dur">${l.green_duration}s</span>
+      </div>`;
+    }).join("");
+  }catch(e){}
+}
+
+// main poll
+async function tick(){
+  try{
+    const r=await fetch("/api/snapshot"); const snap=await r.json();
+    if(snap.length){
+      const isLive=snap[0].data_source==="REAL";
+      renderAll(snap,isLive);
+    }
+  }catch(e){}
+}
+
+// live countdown (every second)
+setInterval(()=>{
+  if(!greenLaneId)return;
+  const rem=Math.max(0,Math.round((greenEndsAt-Date.now())/1000));
+  const m=sigMap[greenLaneId];
+  if(m){const el=document.getElementById(m.t);
+    if(el&&el.className.baseVal.includes("green")) el.textContent=rem>0?rem+"s":"—";}
+},1000);
+
+tick(); updateStats(); updateLog();
+setInterval(tick,2500);
+setInterval(()=>{updateStats();updateLog();},5000);
+</script>
+</body>
+</html>
