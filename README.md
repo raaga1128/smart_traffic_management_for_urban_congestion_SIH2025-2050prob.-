@@ -1,39 +1,31 @@
 <div align = "center">
  
 # Traffic-Management-Using-AI
-  
-[![Python version](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-370/)
-[![Python version](https://img.shields.io/badge/matplotlib-3.5.1-green.svg)](https://pypi.org/project/matplotlib/)
-[![Python version](https://img.shields.io/badge/NEAT-0.92-yellow.svg)](https://pypi.org/project/neat-python/)
-[![MATLAB](https://img.shields.io/badge/MATLAB-gray.svg)](https://www.mathworks.com/products/matlab.html)
-[![Python version](https://img.shields.io/badge/pygame-2.1.2-blue.svg)](https://pypi.org/project/pygame/)
- <p> Our Traffic Management System Uses AI to Coordinate traffic such that people have to Spent the least time in traffic. Our AI coordinate between traffic signals to ensure people don't have to stop at multiple signals. We use image detection to find traffic density and allot time dynamically to each lane.</p>
+ <p> Our AI-based Traffic Management System coordinates traffic signals to reduce waiting time and improve traffic flow. The system analyzes real-time traffic density using image detection from CCTV cameras and dynamically adjusts signal timings. This ensures vehicles spend less time at intersections and avoids unnecessary stops at consecutive traffic signals.</p>
 </div>
  
  ## Problem Statement
- * Congestion is mainly due to the intensive use of automobiles, whose ownership has spread massively in Urban Area in recent decades.
- * A lot of time gets wasted in traffic signals as the no. of the vehicles is the less than expected.
- * While driving through consecutive traffic signals we often have to wait at each of the signal.
- * Traffic Not only cause the extra delay but also increase fuel consumption, and transportation cost.
+ * Traffic congestion has increased due to the rapid growth of automobiles in urban areas.
+ * Fixed traffic signal timings cause delays even when fewer vehicles are present.
+ * Vehicles often have to stop at multiple consecutive signals.
+ * Traffic congestion increases travel time, fuel consumption, and transportation costs.
 
-## Customary Solutions
-* **Manual Controlling** :- As the Name Suggests That's requires More ManPower to control Traffic and Traffic Police is alloted to each traffic signals and they have to control traffic.
-* **Automatic Controlling** :- Automatic Traffic Light is Controlled by the timer and electrical Sensors. The Light are getting automatically Getting ON and OFF. 
-* **Electronic Controlling** :- In Electronic Contrilling Method We have To placing some detector or sensors on the traffic area, and this sensors give data about the traffic Density and controll the traffic signals.
+## Existing Solutions
+* **Manual Control** : Traffic police manually manage traffic signals and vehicle movement at intersections. This approach requires significant human effort and constant monitoring.
+* **Automatic Control** : Traffic signals operate based on predefined timer cycles. Each lane receives a fixed green signal duration regardless of the actual traffic density.
+* **Electronic Control** : Sensors or detectors installed at intersections collect traffic data such as vehicle presence or density. This data is then used to adjust signal timings automatically.
 
 ## Drawbacks of the Customary Solution
-* The Manual Controlling System is static and requires a large number of manpower.
-* They May cause a delay in the quick movement of traffic.
-* Electronic Sensors and detector are very expensive in cost, accuracy and coverage are often in conflict. 
+* Manual systems require large manpower and constant supervision.
+* Fixed-timer systems do not adapt to real traffic conditions.
+* Sensor-based systems can be expensive and may have limitations in accuracy and coverage.
 
 ## Proposed System
-<p>The Traffic flow has no specific pattern that is followed, and the static signal timers pose a huge problem to the already critical problem of congestion.</p>
+<p>Traffic flow is unpredictable, and static signal timings often worsen congestion.
 
-<p>Therefore, we are implementing a system which aims to reduce chance of such scenarios by automatically computing the optimal green signal time based on the current traffic at the signal will ensure that the direction with more traffic is allotted a green signal for longer duration of time as compared to the direction with lesser traffic.</p>
+Our proposed system uses AI with edge computing to analyze real-time traffic data from CCTV cameras using image recognition techniques. The AI calculates traffic density and dynamically adjusts the green signal duration so that lanes with higher traffic receive longer signal time.
 
-<p>So our dynamic traffic management system can override the current static system which cause unwanted delays and congestion. also our system will also reduce the time complexity of vehicles pass.</p>
-
-<p>The main objective of our system is to design an AI Based on Edge Computing that can Solve Current Traffic Situation Our System aims to use Image Recognization System and Live video feed from the CCTV Cameras at Traffic Junctions for calculating Real time traffic density and our AI Set the signal Time accordingly.</p>
+This system reduces unnecessary waiting, improves traffic flow, and minimizes congestion at intersections.</p>
 
 ## Advantages of the Our Traffic Management System
 * Autonomous: There are no need of the Manpower
@@ -41,81 +33,35 @@
 * Less expensive than other solutions.
 * There are no need to new hardware to be installed.
 
-## Step by Step FlowChart of our Proposed System
-Step 1 :- Capturing Vehicles Image Using CCTV At Traffic Signals</br>
-Step 2 :- Indetify The Vehicles and Calculate Number of the Vehicles</br>
-Step 3 :- Send Final Number of the Vehicles to AI</br>
-Step 4 :- AI Scheduling the Green Signal Time according to Traffic Density</br>
-Step 5 :- Updating traffic Signal Time</br>
-
 ## Some of the Factors That Our AI Considered  While Switching Traffic Signals
-* The Processing Time of the Image Recognization System to Calculate traffic Density.
-* Lag each vehicle suffers during start up.
-* Average speed each catagory of Vehicles.
-* The no. of Lanes.
+* Processing time of the image recognition system.
+* Startup delay of vehicles.
+* Average speed of different vehicle types.
+* Number of lanes at the intersection.
 
 ## Installation
-
-All user Installation
-```
-pip install neat-python
-pip install pygame
-```
-for the Graph only
-```
-pip install matplotlib
-```
-
-Run the Python File
-```
-python simulation.py
-```
-
-For the Using NEAT Download the config.txt file from the Below Link</br>
-Link :- https://techwithtim.net/wp-content/uploads/2019/08/config-feedforward.txt</br>
-Save the Above file as config.txt 
-
-## Visualization Of the Static Model
-<p>Here we see in our static model that static time is given to each signal i.e. 30sec which leads to wastage of time when enough vehicles are not present in that lane. </p>
-
-https://user-images.githubusercontent.com/83399207/166122672-41c9be4b-f215-4673-9019-69fec0b0b2e3.mp4
+Install required libraries:
+               pip install neat-python
+               pip install pygame
+               
+For graph visualization:
+               pip install matplotlib
+ 
+Run the simulation:
+               python "simulation Dy.py"
+               
 
 ## Visualization Of the Dynamic Model
-<p>In our dynamic model, using image detection we determine the traffic density in that lane and provide just enough time for the vehicles to pass which leads to time 
-being saved in each of the lane and in each cycle. </p>
+<p>In our dynamic model, using image detection we determine the traffic density in that lane and provide just enough time for the vehicles to pass which leads to time being saved in each of the lane and in each cycle.</p>
 
-https://user-images.githubusercontent.com/83399207/166122642-451f48f1-028a-4911-adb0-2c7ab9ae892d.mp4
+
+https://github.com/user-attachments/assets/61f1437e-f24e-44d4-92d4-cba9f859633a
+
 
 ## Results
-Here we Compare the Total Number of the Vehicles that crosses the intersection over 1 Simulation(5 Min.) in the current system and Our implemented System With The random number of the Vehicles, Over A Total Time of 1 Hour With 12 Simulations of 5 Minutes each.  
+In this experiment, we compare the total number of vehicles that pass through the intersection in the existing system and the proposed system. Each simulation runs for 5 minutes, and a total of 12 simulations are conducted over 1 hour with randomly generated vehicle traffic. The comparison helps evaluate the efficiency of our system in handling traffic flow.
 
-![Comparison](https://user-images.githubusercontent.com/83399207/166123300-80854b3e-3da2-446d-87a5-b07aa1595325.png)
-
-## Graph Representation
-<p>As we can see with all conditions alike, our dynamic system was able to pass 3193 Vehicles while the current static system could pass only 2356 in 1 hour which means 837 more vehicles.
-
- Thus our proposed Traffic managment system with AI improves the performance by over 35%.
- 
- Our proposed system on and average allow 70 more vehicles to pass every one simulation(5 min) aas compared to the current system this implies a reduction in time complexity of green signal time(Signal is green but no vehiclea passes) as well as the waiting time of the vehicles.
-</p>
-
-![graph](https://user-images.githubusercontent.com/83399207/166123319-a8e4a219-3ec0-4d55-9fd1-607147ea2d7e.png)
-## NEAT AI
-### Working of NEAT AI
-
-
-
-![1](https://user-images.githubusercontent.com/83399207/166124081-42d7b3b2-f355-465a-9fae-dac8cff24043.jpg)
-![2](https://user-images.githubusercontent.com/83399207/166124084-84de468e-f0c4-471a-b7c8-23db6680f1ab.jpg)
-![3](https://user-images.githubusercontent.com/83399207/166124086-1a5d9c4b-4faf-45a8-a431-0c9cf631c871.jpg)
-![4](https://user-images.githubusercontent.com/83399207/166124091-2e9a53e0-9658-44c7-8f94-518787e48e97.jpg)
-![5](https://user-images.githubusercontent.com/83399207/166124089-18e2785f-6d9e-4422-9167-6e4fd107e662.jpg)
-![6](https://user-images.githubusercontent.com/83399207/166124090-74ff8b01-9fb5-4476-85e0-5d6327c1b0c4.jpg)
-
-## Graphical visualization of AI
-The following video shows how the AI will coordinate the signals so that the vehicles will not have to stop at every signal if they want to travel on the same straight route.
-
-https://user-images.githubusercontent.com/83399207/166124009-7ae31ef1-dd3f-4070-b77b-f8539402f355.mp4
+The dynamic AI-based system demonstrates better traffic flow and reduced waiting time compared to the traditional static signal system.
 
 ### Conclusion
 - Using the dynamic model we can effectively reduce the waiting time of the vehicles.
